@@ -31,8 +31,7 @@ const SampleCard = (props: { sample: string; isLoading: boolean }) => {
       ) : (
         <Flex direction={"column"} gap="0.5rem">
           <Box>
-            <Text></Text>
-            Amostra:
+            <Text>Amostra:</Text>
           </Box>
 
           <Box>{props.sample}</Box>

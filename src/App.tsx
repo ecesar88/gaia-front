@@ -8,23 +8,28 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import mock from "./api/mock";
-import DescriptionCard from "./components/DescriptionCard";
+import MetadataCard from "./components/MetadataCard";
 import ResultList from "./components/ResultList";
 import SampleCard from "./components/SampleCard";
 import theme from "./theme/theme";
 import logo from "./assets/logo.png";
+import { DownloadIcon } from "@chakra-ui/icons";
+import useApi from "./hooks/useApi";
+import endpoints from "./api/endpoints";
 
 function App() {
-  // const { data, error, execute } = useApi({
-  //   url: endpoints.SELECT("IBGE"),
-  // });
+  const { data, error, execute } = useApi({
+    url: endpoints.SELECT("IBGE"),
+  });
 
   const [response, setResponse] = useState<typeof mock>();
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedSample, setSelectedSample] = useState<string>();
+  const [selectedSample, setSelectedSample] = useState<
+    (typeof mock.response.docs)[number] | undefined
+  >();
 
   const dataMock = async () => {
     return new Promise((resolve) =>
@@ -48,12 +53,20 @@ function App() {
       });
   }
 
-  console.log({ response });
+  const handleSearchButtonOnClick = async () => {
+    getData();
 
-  const handleSearchButtonOnClick = () => getData();
+    const res = await execute();
 
-  const handleSelectSample = (sample: string) => {
+    console.log({ res });
+  };
+
+  const handleSelectSample = (sample: (typeof mock.response.docs)[number]) => {
     setSelectedSample(sample);
+  };
+
+  const handleDownloadGitOnClick = (linkGit: string) => {
+    window.open(linkGit, "_blank")?.focus();
   };
 
   return (
@@ -95,7 +108,7 @@ function App() {
                   fontWeight="bold"
                   fontSize={{ base: "large", xl: "x-large" }}
                 >
-                  Plataforma de governar e recorvenção de dados
+                  Plataforma de governança e recorvenção de dados
                 </Text>
               </Box>
             </Flex>
@@ -127,7 +140,7 @@ function App() {
                       name={doc.dominio}
                       description={doc.descricao}
                       isLoading={isLoading}
-                      onClick={() => handleSelectSample(doc.amostra)}
+                      onClick={() => handleSelectSample(doc)}
                     />
                   ))}
                 </Flex>
@@ -155,13 +168,38 @@ function App() {
           padding="1rem"
           maxWidth={{ base: "100%", xl: "45%" }}
         >
-          {selectedSample?.length ? (
+          {selectedSample !== undefined ? (
             <>
-              <DescriptionCard />
+              <MetadataCard metadata={selectedSample.metadados} />
               <SampleCard
-                sample={selectedSample as string}
+                sample={selectedSample.amostra}
                 isLoading={isLoading}
               />
+
+              <Flex
+                backgroundColor="white"
+                padding="1rem"
+                width={"100%"}
+                borderRadius="1rem"
+                justifyContent={"center"}
+                alignItems={"center"}
+              >
+                <Flex
+                  justifyContent={"center"}
+                  alignItems={"center"}
+                  gap="0.5rem"
+                  cursor={"pointer"}
+                  onClick={() =>
+                    handleDownloadGitOnClick(selectedSample.linkgit)
+                  }
+                >
+                  <Text fontSize={"large"} fontWeight={"bold"}>
+                    Download Git
+                  </Text>
+
+                  <DownloadIcon />
+                </Flex>
+              </Flex>
             </>
           ) : null}
         </Flex>
