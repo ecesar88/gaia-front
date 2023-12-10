@@ -8,7 +8,7 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import mock from "./api/mock";
 import MetadataCard from "./components/MetadataCard";
