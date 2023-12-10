@@ -3,6 +3,7 @@ import { Box, Text, Flex, Spinner } from "@chakra-ui/react";
 const SampleCard = (props: { sample: string; isLoading: boolean }) => {
   return (
     <Box
+      border="2px solid white"
       padding="1.5rem"
       fontFamily={"monospace"}
       fontSize={"1rem"}

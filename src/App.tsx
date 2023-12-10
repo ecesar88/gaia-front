@@ -4,6 +4,7 @@ import {
   ChakraProvider,
   Container,
   Flex,
+  Image,
   Input,
   Text,
 } from "@chakra-ui/react";
@@ -14,6 +15,7 @@ import DescriptionCard from "./components/DescriptionCard";
 import ResultList from "./components/ResultList";
 import SampleCard from "./components/SampleCard";
 import theme from "./theme/theme";
+import logo from "./assets/logo.png";
 
 function App() {
   // const { data, error, execute } = useApi({
@@ -58,7 +60,8 @@ function App() {
     <ChakraProvider theme={theme} resetCSS>
       <Container
         height="100%"
-        maxW={{ md: "100%", "2xl": "1800px" }}
+        maxW={{ sm: "100%", "2xl": "1800px" }}
+        flexDirection={{ base: "column", lg: "row" }}
         width="100%"
         display="flex"
         gap="1rem"
@@ -70,16 +73,35 @@ function App() {
           justifyContent={"center"}
           flex={6}
           padding={"1rem"}
+          marginTop={{ base: "9rem", md: "none" }}
         >
-          <Box w="300px" h="80px">
-            Logo
+          <Box h="150px">
+            <Flex
+              justifyContent={"flex-start"}
+              alignItems={"center"}
+              gap="0.5rem"
+            >
+              <Image src={logo} boxSize="120px" objectFit="scale-down" />
+
+              <Box>
+                <Text
+                  fontWeight="bold"
+                  fontSize={{ base: "large", xl: "x-large" }}
+                >
+                  GAIA
+                </Text>
+
+                <Text
+                  fontWeight="bold"
+                  fontSize={{ base: "large", xl: "x-large" }}
+                >
+                  Plataforma de governar e recorvenção de dados
+                </Text>
+              </Box>
+            </Flex>
           </Box>
 
           <Flex direction="column" gap="0.5rem">
-            <Text fontWeight="bold" fontSize="large">
-              CNAE
-            </Text>
-
             <Flex w="100%" gap="1rem" alignItems={"flex-start"}>
               <Flex
                 direction={"column"}
@@ -93,10 +115,10 @@ function App() {
                 <Input placeholder="Pesquisar" />
 
                 <Flex
-                  maxHeight={"500px"}
+                  maxHeight={"350px"}
                   direction={"column"}
                   gap="0.5rem"
-                  overflow={"scroll"}
+                  overflowY={"scroll"}
                   paddingRight={"1rem"}
                 >
                   {response?.response.docs.map((doc) => (
@@ -114,6 +136,8 @@ function App() {
               <Button
                 top="10px"
                 isLoading={isLoading}
+                backgroundColor="black"
+                color="white"
                 onClick={handleSearchButtonOnClick}
               >
                 <Text fontWeight="bold" fontSize="small">
@@ -129,7 +153,7 @@ function App() {
           flex={6}
           gap="1rem"
           padding="1rem"
-          maxWidth={"45%"}
+          maxWidth={{ base: "100%", xl: "45%" }}
         >
           {selectedSample?.length ? (
             <>
