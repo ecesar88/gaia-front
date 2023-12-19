@@ -10,7 +10,6 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import "./App.css";
-import mock from "./api/mock";
 import MetadataCard from "./components/MetadataCard";
 import ResultList from "./components/ResultList";
 import SampleCard from "./components/SampleCard";
@@ -19,49 +18,24 @@ import logo from "./assets/logo.png";
 import { DownloadIcon } from "@chakra-ui/icons";
 import useApi from "./hooks/useApi";
 import endpoints from "./api/endpoints";
+import { ResponseType } from "./api/types";
 
 function App() {
-  const { data, error, execute } = useApi({
-    url: endpoints.SELECT("IBGE"),
+  const [search, setSearch] = useState("");
+  const [selectedSample, setSelectedSample] =
+    useState<ResponseType["response"]["docs"][number]>();
+
+  const { execute, data, isLoading } = useApi<ResponseType>({
+    url: endpoints.SELECT(search),
   });
 
-  const [response, setResponse] = useState<typeof mock>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedSample, setSelectedSample] = useState<
-    (typeof mock.response.docs)[number] | undefined
-  >();
-
-  const dataMock = async () => {
-    return new Promise((resolve) =>
-      setTimeout(() => {
-        resolve(mock);
-      }, 1500)
-    );
-  };
-
-  function getData() {
-    setIsLoading(true);
-
-    dataMock()
-      .then((data) => {
-        setResponse(() => {
-          return data as typeof mock;
-        });
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }
-
   const handleSearchButtonOnClick = async () => {
-    getData();
-
-    const res = await execute();
-
-    console.log({ res });
+    await execute();
   };
 
-  const handleSelectSample = (sample: (typeof mock.response.docs)[number]) => {
+  const handleSelectSample = (
+    sample: ResponseType["response"]["docs"][number]
+  ) => {
     setSelectedSample(sample);
   };
 
@@ -125,7 +99,11 @@ function App() {
                 borderColor="#DEDEDE"
                 paddingTop="0.5rem"
               >
-                <Input placeholder="Pesquisar" />
+                <Input
+                  placeholder="Pesquisar"
+                  value={search}
+                  onChange={(evt) => setSearch(evt.target.value)}
+                />
 
                 <Flex
                   maxHeight={"350px"}
@@ -134,15 +112,19 @@ function App() {
                   overflowY={"scroll"}
                   paddingRight={"1rem"}
                 >
-                  {response?.response.docs.map((doc) => (
-                    <ResultList
-                      key={doc.id}
-                      name={doc.dominio}
-                      description={doc.descricao}
-                      isLoading={isLoading}
-                      onClick={() => handleSelectSample(doc)}
-                    />
-                  ))}
+                  {data?.response?.docs?.length ? (
+                    data?.response.docs.map((doc) => (
+                      <ResultList
+                        key={Math.random().toString()}
+                        name={doc.dominio}
+                        description={doc.descricao}
+                        isLoading={isLoading}
+                        onClick={() => handleSelectSample(doc)}
+                      />
+                    ))
+                  ) : (
+                    <>Nenhum resultado encontrado</>
+                  )}
                 </Flex>
               </Flex>
 

@@ -16,17 +16,16 @@ type ErrorType = {
 const useApi = <T = object>(options: useApiOptions) => {
   const [data, setData] = useState<T | undefined>();
   const [error, setError] = useState<ErrorType>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const execute = async () => {
+    setIsLoading(true);
     try {
       const data = await api<T>({
         method: options.method ?? "GET",
         url: options.url,
         params: options.params ?? undefined,
       });
-
-      console.log("STATUS >>>>>>>>>>>>> ", data.status);
 
       setData(() => {
         setError(null);
