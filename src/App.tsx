@@ -109,6 +109,10 @@ function App() {
                 <Input
                   placeholder="Pesquisar"
                   value={search}
+                  onKeyDown={async (evt) => {
+                    if (evt.key !== "Enter") return;
+                    await execute();
+                  }}
                   onChange={(evt) => {
                     setFoundSomething(false);
                     setResponse(undefined);
@@ -164,7 +168,7 @@ function App() {
                     variant="ghost"
                     onClick={() => {
                       setResponse(undefined);
-                      setSelectedSample(undefined)
+                      setSelectedSample(undefined);
                       setSearch("");
                     }}
                   >
