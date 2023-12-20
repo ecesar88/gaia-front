@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  ButtonGroup,
   ChakraProvider,
   Container,
   Flex,
@@ -22,11 +23,17 @@ import { ResponseType } from "./api/types";
 
 function App() {
   const [search, setSearch] = useState("");
+  const [foundSomething, setFoundSomething] = useState(false);
+  const [response, setResponse] = useState<ResponseType>();
+
   const [selectedSample, setSelectedSample] =
     useState<ResponseType["response"]["docs"][number]>();
 
-  const { execute, data, isLoading } = useApi<ResponseType>({
+  const { execute, isLoading } = useApi<ResponseType>({
     url: endpoints.SELECT(search),
+    onComplete: (data) => {
+      setResponse(data);
+    },
   });
 
   const handleSearchButtonOnClick = async () => {
@@ -102,7 +109,11 @@ function App() {
                 <Input
                   placeholder="Pesquisar"
                   value={search}
-                  onChange={(evt) => setSearch(evt.target.value)}
+                  onChange={(evt) => {
+                    setFoundSomething(false);
+                    setResponse(undefined);
+                    setSearch(evt.target.value);
+                  }}
                 />
 
                 <Flex
@@ -111,34 +122,58 @@ function App() {
                   gap="0.5rem"
                   overflowY={"scroll"}
                   paddingRight={"1rem"}
+                  overflow={"hidden"}
                 >
-                  {data?.response?.docs?.length ? (
-                    data?.response.docs.map((doc) => (
-                      <ResultList
-                        key={Math.random().toString()}
-                        name={doc.dominio}
-                        description={doc.descricao}
-                        isLoading={isLoading}
-                        onClick={() => handleSelectSample(doc)}
-                      />
-                    ))
-                  ) : (
+                  {response?.response?.docs?.length
+                    ? response?.response?.docs?.map((doc) => (
+                        <ResultList
+                          key={Math.random().toString()}
+                          name={doc.dominio}
+                          description={doc.descricao}
+                          isLoading={isLoading}
+                          onClick={() => handleSelectSample(doc)}
+                        />
+                      ))
+                    : null}
+
+                  {!foundSomething && response !== undefined ? (
                     <>Nenhum resultado encontrado</>
-                  )}
+                  ) : null}
                 </Flex>
               </Flex>
 
-              <Button
-                top="10px"
-                isLoading={isLoading}
-                backgroundColor="black"
-                color="white"
-                onClick={handleSearchButtonOnClick}
-              >
-                <Text fontWeight="bold" fontSize="small">
-                  PESQUISAR
-                </Text>
-              </Button>
+              <ButtonGroup>
+                <Button
+                  top="10px"
+                  isLoading={isLoading}
+                  backgroundColor="black"
+                  color="white"
+                  onClick={handleSearchButtonOnClick}
+                >
+                  <Text fontWeight="bold" fontSize="small">
+                    Pesquisar
+                  </Text>
+                </Button>
+
+                {response !== undefined ? (
+                  <Button
+                    top="10px"
+                    backgroundColor="white"
+                    color="black"
+                    border="2px solid"
+                    variant="ghost"
+                    onClick={() => {
+                      setResponse(undefined);
+                      setSelectedSample(undefined)
+                      setSearch("");
+                    }}
+                  >
+                    <Text fontWeight="bold" fontSize="small">
+                      Limpar
+                    </Text>
+                  </Button>
+                ) : null}
+              </ButtonGroup>
             </Flex>
           </Flex>
         </Flex>
