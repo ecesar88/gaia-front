@@ -9,7 +9,7 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import "./App.css";
 import MetadataCard from "./components/MetadataCard";
 import ResultList from "./components/ResultList";
@@ -23,22 +23,25 @@ import { ResponseType } from "./api/types";
 
 function App() {
   const [search, setSearch] = useState("");
-  const [foundSomething, setFoundSomething] = useState(false);
   const [response, setResponse] = useState<ResponseType>();
 
   const [selectedSample, setSelectedSample] =
     useState<ResponseType["response"]["docs"][number]>();
 
-  const { execute, isLoading } = useApi<ResponseType>({
+  const { execute, isLoading, data } = useApi<ResponseType>({
     url: endpoints.SELECT(search),
     onComplete: (data) => {
       setResponse(data);
     },
   });
 
+  console.log(data);
+
   const handleSearchButtonOnClick = async () => {
     await execute();
   };
+
+  const key = useId();
 
   const handleSelectSample = (
     sample: ResponseType["response"]["docs"][number]
@@ -114,7 +117,6 @@ function App() {
                     await execute();
                   }}
                   onChange={(evt) => {
-                    setFoundSomething(false);
                     setResponse(undefined);
                     setSearch(evt.target.value);
                   }}
@@ -126,21 +128,19 @@ function App() {
                   gap="0.5rem"
                   overflowY={"scroll"}
                   paddingRight={"1rem"}
-                  overflow={"hidden"}
                 >
-                  {response?.response?.docs?.length
-                    ? response?.response?.docs?.map((doc) => (
-                        <ResultList
-                          key={Math.random().toString()}
-                          name={doc.dominio}
-                          description={doc.descricao}
-                          isLoading={isLoading}
-                          onClick={() => handleSelectSample(doc)}
-                        />
-                      ))
-                    : null}
-
-                  {!foundSomething && response !== undefined ? (
+                  {response?.response?.docs?.length ? (
+                    response?.response?.docs?.map((doc, idx) => (
+                      <ResultList
+                        key={`${key}-${idx}`}
+                        name={doc.dominio}
+                        description={doc.descricao}
+                        isLoading={isLoading}
+                        onClick={() => handleSelectSample(doc)}
+                      />
+                    ))
+                  ) : data?.response !== undefined &&
+                    data?.response?.numFound != 0 ? (
                     <>Nenhum resultado encontrado</>
                   ) : null}
                 </Flex>
